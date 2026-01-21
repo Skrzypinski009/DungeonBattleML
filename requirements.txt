@@ -1,0 +1,9 @@
+numpy
+peewee
+pandas
+pytest
+kivy
+scikit-learn
+stable_baselines3
+gymnasium 
+

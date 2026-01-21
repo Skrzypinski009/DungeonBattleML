@@ -1,0 +1,77 @@
+from pandas import DataFrame
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import classification_report
+from db.models import AI_Model
+import joblib
+import numpy as np
+
+
+def create_ai_model(model_type: str, name: str, data):
+    file_name = f"{name}.joblib"
+    joblib.dump(data, f"data/ai_models/{file_name}")
+    AI_Model.create(
+        type=model_type,
+        name=name,
+        file_name=file_name,
+    )
+
+
+def get_all_ai_models() -> dict:
+    models = get_ai_models_metadata()
+    for row in models:
+        file_name = row["file_name"]
+        row["data"] = joblib.load(f"data/ai_models/{file_name}")
+
+    return models
+
+
+def get_ai_models_metadata() -> dict:
+    return AI_Model.select().dicts()
+
+
+def get_model_by_name(name: str) -> AI_Model | None:
+    return AI_Model.select().where(AI_Model.name == name).first()
+
+
+def train_model(type: str, dataset_df: DataFrame) -> dict:
+    if type == "decision_tree":
+        return train_decision_tree(dataset_df)
+    return {}
+
+
+def train_decision_tree(df: DataFrame) -> dict:
+    model = DecisionTreeClassifier()
+    df = df.sample(frac=1, random_state=42).reset_index(drop=True)
+    df.pop("dataset_nr")
+
+    n = len(df)
+
+    train_size = int(n * 0.7)
+
+    X_train = df.iloc[:train_size]
+    X_test = df.iloc[train_size:]
+
+    y_train = X_train.pop("action_type")
+    y_test = X_test.pop("action_type")
+
+    # trenowanie
+    model.fit(X_train, y_train)
+    # predykcja
+    y_pred = model.predict(X_test)
+    # ocena w %
+    score = model.score(X_test, y_test)
+    # ocena względem każdej akcji
+    report = classification_report(y_test, y_pred)
+
+    return {
+        "type": "decision_tree",
+        "model": model,
+        "score": score,
+        "report": report,
+    }
+
+def get_next_action(model: AI_Model, battle_history_row):
+    if model.type == "decision_tree":
+    model.predict()
+    pass
+
