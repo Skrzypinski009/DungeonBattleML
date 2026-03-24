@@ -1,5 +1,4 @@
 from threading import Thread
-
 from kivy.base import Clock
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
@@ -8,12 +7,15 @@ from kivy.uix.spinner import Spinner
 from kivy.uix.textinput import TextInput
 from pandas import DataFrame
 from services import ai_model_service, dataset_service
-
 from ui.assets.menu import MenuButton, MenuContainer
 from ui.assets.play_settings_popup import PlaySettingsPopup
 from ui.assets.screen_title import ScreenTitle
 from ui.assets.train_popup import TrainPopup
 
+from ui.assets.menu import (
+    menu_widget_settings,
+)
+from ui.assets.int_input import IntInput
 from .base_screen import BaseScreen
 
 
@@ -53,7 +55,7 @@ class NewModelScreen(BaseScreen):
         self.supervised_model_types = [
             "Drzewo decyzyjne",
             "Las losowy",
-            "Sieć Neuronowa S",
+            "Sieć Neuronowa",
         ]
         self.reinforcement_model_types = [
             "Q Table",
@@ -61,11 +63,9 @@ class NewModelScreen(BaseScreen):
 
         self.name_input = TextInput(
             multiline=False,
-            size_hint=(None, None),
-            size=(250, 50),
-            pos_hint={"center_x": 0.5},
             font_size=20,
             hint_text="Nazwa modelu",
+            **menu_widget_settings,
         )
         self.name_input.bind(text=lambda *_: self.name_update())
 
@@ -80,9 +80,7 @@ class NewModelScreen(BaseScreen):
         self.model_type_spinner = Spinner(
             values=self.supervised_model_types
             + self.reinforcement_model_types,
-            size_hint=(None, None),
-            size=(250, 50),
-            pos_hint={"center_x": 0.5},
+            **menu_widget_settings,
         )
         self.model_type_spinner.bind(
             text=lambda *_: self.model_type_selected()
@@ -90,9 +88,7 @@ class NewModelScreen(BaseScreen):
 
         self.dataset_spinner = Spinner(
             values=self.dataset_names,
-            size_hint=(None, None),
-            size=(250, 50),
-            pos_hint={"center_x": 0.5},
+            **menu_widget_settings,
         )
         self.dataset_spinner.bind(text=lambda *_: self.dataset_selected())
 
@@ -100,21 +96,23 @@ class NewModelScreen(BaseScreen):
             "Wybierz przeciwników", lambda _: self.enemies_options.open()
         )
 
-        self.train_btn = Button(
+        self.episodes_input = IntInput(
+            min_val=3,
+            max_val=1000,
+            **menu_widget_settings,
+            font_size=20,
+        )
+
+        self.train_btn = MenuButton(
             text="Trenuj",
-            size_hint=(None, None),
-            size=(250, 50),
-            on_press=lambda _: self.train(),
+            callback=lambda _: self.train(),
             disabled=True,
-            pos_hint={"center_x": 0.5},
         )
 
         back_btn = Button(
             text="Powrót",
-            size_hint=(None, None),
-            size=(250, 50),
             on_press=lambda _: self.go("Models", "right"),
-            pos_hint={"center_x": 0.5},
+            **menu_widget_settings,
         )
 
         layout.add_widget(Label())
@@ -144,16 +142,22 @@ class NewModelScreen(BaseScreen):
 
         elif self.model_type_spinner.text in self.reinforcement_model_types:
             self.form_layout.add_widget(self.enemies_option_btn)
-            self.form_layout.height = self.enemies_option_btn.height
+            self.form_layout.add_widget(self.episodes_input)
+            self.form_layout.height = (
+                self.enemies_option_btn.height
+                + self.episodes_input.height
+                + self.form_layout.spacing
+            )
 
     def train_task(self, model_type, dataset_df=None):
         train_result = None
-        if dataset_df:
+        if dataset_df is not None:
             train_result = ai_model_service.train_model(model_type, dataset_df)
         else:
             train_result = ai_model_service.train_in_env(
                 model_type,
                 self.enemies_options.get_enemy_list(),
+                self.episodes_input.get_value(),
             )
 
         self.train_after(train_result)

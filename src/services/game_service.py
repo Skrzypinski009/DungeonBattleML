@@ -52,7 +52,7 @@ def game_turn_data(
         action,
     )
     logs = battle_history_service.history_log(
-        history, cast(BattleState, current_battle)
+        cast(BattleState, current_battle),
     )
     player = history.battle_state.game.player
     battles_count = battle_service.get_battles_count(game)

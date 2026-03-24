@@ -1,6 +1,5 @@
 from random import randint
 
-import joblib
 from ai_models.game_env import GameEnv
 from ai_models.q_table_agent import QTableAgent
 from db.models import AI_Model
@@ -14,35 +13,24 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
 
 from services import actor_service, ai_learn_service, dataset_service
+import pandas as pd
+import pickle
 
 
 def create_ai_model(model_type: str, name: str, model):
-    file_name = f"{name}.joblib"
-    joblib.dump(model, f"data/ai_models/{file_name}")
     AI_Model.create(
         type=model_type,
         name=name,
-        file_name=file_name,
+        data=pickle.dumps(model),
     )
 
 
-def get_all_ai_models() -> dict:
-    models = get_ai_models_metadata()
-    for row in models:
-        file_name = row["file_name"]
-        row["data"] = joblib.load(f"data/ai_models/{file_name}")
-
-    return models
+def get_ai_models():
+    return list(AI_Model.select().execute())
 
 
-def get_ai_models_metadata() -> dict:
-    return AI_Model.select().dicts()
-
-
-def get_model_by_name(name: str) -> dict:
-    model = AI_Model.select().where(AI_Model.name == name).limit(1).dicts()[0]
-    file_name = model["file_name"]
-    model["data"] = joblib.load(f"data/ai_models/{file_name}")
+def get_model_by_name(name: str) -> AI_Model:
+    model = AI_Model.select().where(AI_Model.name == name).first()
     return model
 
 
@@ -78,7 +66,7 @@ def get_splitted_data(df: DataFrame) -> tuple:
     return (X_train, X_test, y_train, y_test)
 
 
-def simple_train(df: DataFrame, model, model_type: str) -> dict:
+def supervised_learning(df: DataFrame, model, model_type: str) -> dict:
     df.fillna(0, inplace=True)
 
     X_train, X_test, y_train, y_test = get_splitted_data(df)
@@ -88,25 +76,38 @@ def simple_train(df: DataFrame, model, model_type: str) -> dict:
     y_pred = model.predict(X_test)
     # ocena w %
     score = model.score(X_test, y_test)
+
+    target_names = ["attack", "heavy_attack", "block", "regeneration", "none"]
     # ocena względem każdej akcji
-    report = classification_report(y_test, y_pred)
+    report = classification_report(
+        y_test, y_pred, target_names=target_names, output_dict=True
+    )
+
+    rows = [report[label_name] for label_name in target_names]
+    print(rows)
+
+    df_report = pd.DataFrame(rows)
 
     return {
         "type": model_type,
         "model": model,
         "score": score,
-        "report": report,
+        "report": df_report,
     }
 
 
 def train_random_forest(df: DataFrame) -> dict:
-    model = RandomForestClassifier()
-    return simple_train(df, model, "random_forest")
+    model = RandomForestClassifier(
+        n_estimators=100,
+        max_depth=10,
+        max_features="sqrt",
+    )
+    return supervised_learning(df, model, "random_forest")
 
 
 def train_decision_tree(df: DataFrame) -> dict:
-    model = DecisionTreeClassifier()
-    return simple_train(df, model, "decision_tree")
+    model = DecisionTreeClassifier(max_depth=6)
+    return supervised_learning(df, model, "decision_tree")
 
 
 def train_mlp(df: DataFrame) -> dict:
@@ -120,31 +121,37 @@ def train_mlp(df: DataFrame) -> dict:
                     activation="relu",
                     solver="adam",
                     max_iter=500,
+                    early_stopping=True,
                     random_state=42,
                 ),
             ),
         ]
     )
-    return simple_train(df, model, "mlp")
+    return supervised_learning(df, model, "mlp")
 
 
-def train_in_env(model_type: str, enemy_list: list) -> dict:
-    if model_type:
-        pass
-    model = QTableAgent(GameEnv.N_STATES, GameEnv.N_ACTIONS)
-    result = ai_learn_service.reinforcement_learning(model, 1, enemy_list)
+def train_in_env(model_type: str, enemy_list: list, episodes: int) -> dict:
+    result = {}
+    if model_type == "q_table":
+        model = QTableAgent(GameEnv.N_STATES, GameEnv.N_ACTIONS)
+        result = ai_learn_service.reinforcement_learning(
+            model, episodes, enemy_list
+        )
+
     result["type"] = model_type
     return result
 
 
-def get_next_action(model_dict: dict, battle_state):
-    model = model_dict["data"]
+def get_next_action(model, battle_state):
 
     prediction = None
-    if model_dict["type"] == "q_table":
+    if model.type == "q_table":
         state = dataset_service.get_state_tuple(battle_state)
+        model_data = pickle.loads(model.data)
+        model_data.epsilon = 1
+
         prediction = predict_reinforcement(
-            model,
+            model_data,
             state,
         )
         return prediction
@@ -154,7 +161,7 @@ def get_next_action(model_dict: dict, battle_state):
             battle_state,
         ).dicts()
         prediction = predict_supervised(
-            model,
+            pickle.loads(model.data),
             DataFrame(state).fillna(0),
         )
         return actor_service.action_validate(

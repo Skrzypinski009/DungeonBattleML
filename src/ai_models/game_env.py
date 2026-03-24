@@ -49,13 +49,13 @@ class GameEnv(gym.Env):
     def step(self, action) -> tuple:
 
         self.play_turn(action)
-        reward, terminated, truncated = self.turn_learning_data()
+        reward, terminated, truncated, info = self.turn_learning_data()
         self.state = self.get_current_state()
 
         if terminated or truncated:
             self.end()
 
-        return self.state, reward, terminated, truncated, {}
+        return self.state, reward, terminated, truncated, info
 
     def new_battle(self):
         self.current_battle = battle_service.create_battle(
@@ -95,22 +95,25 @@ class GameEnv(gym.Env):
         reward = 0
         terminated = False
         truncated = False
+        info = {}
 
-        player_hp_ratio, enemy_hp_ratio = self.get_hp_ratio()
+        player_hp_ratio, enemy_hp_ratio = self.get_hp_ratio(self.state)
         hp_ratio = player_hp_ratio - enemy_hp_ratio
         reward += hp_ratio * 2
 
         if self.current_battle.winner:
             terminated = True
             if self.current_battle.winner == self.game.player:
-                reward += 10
+                reward += 20
+                info["winner"] = "player"
             else:
-                reward -= 10
+                reward -= 20
+                info["winner"] = "enemy"
 
         if self.current_battle.turn_nr >= 25:
             truncated = True
 
-        return reward, terminated, truncated
+        return reward, terminated, truncated, info
 
     @classmethod
     def get_hp_ratio(cls, state):

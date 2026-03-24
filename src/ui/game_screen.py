@@ -45,14 +45,14 @@ class GameScreen(BaseScreen):
         self.history_panel = self.right_panel.history_panel
 
         background = Image(
-            source="img/background.jpg",
+            source="img/background.png",
             size_hint=(None, None),
             width=1920,
             height=1080,
             pos_hint={"center_x": 0.5, "center_y": 0.5},
         )
 
-        battle_title = BattleTitle("Battle 1")
+        battle_title = BattleTitle("Walka")
 
         self.icon_bar = IconBar(self.next_action)
         self.stat_bar = StatBars()
@@ -152,8 +152,10 @@ class GameScreen(BaseScreen):
                 "color": (0, 0, 1, 1),
             },
         }
+        next_enemy = self.next_enemy_list.pop()
+        print(next_enemy)
         self.stat_bar.set(stats)
-        self.new_battle(self.next_enemy_list.pop())
+        self.new_battle(next_enemy)
         self.icon_bar.enabled_icons([1, 2, 3, 4])
         self.icon_bar.select_icon(0)
 
@@ -178,7 +180,7 @@ class GameScreen(BaseScreen):
                     "color": (0, 0, 1, 1),
                 },
             },
-            "",
+            next_enemy_name,
         )
         self.enemy_wrapper.enemy_update(enemy_ui)
         self.history_panel.add_history_logs(

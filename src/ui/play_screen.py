@@ -103,8 +103,8 @@ class PlayScreen(BaseScreen):
         self.add_widget(layout)
 
     def load_ai_models(self):
-        self.models = ai_model_service.get_all_ai_models()
-        self.model_names = [model["name"] for model in self.models]
+        self.models = ai_model_service.get_ai_models()
+        self.model_names = [model.name for model in self.models]
 
         self.actor_spinner.values = [
             "Gracz",
@@ -123,7 +123,7 @@ class PlayScreen(BaseScreen):
             model = ai_model_service.get_model_by_name(self.actor_spinner.text)
             actions = []
             # TODO: Create Model Interface
-            if model["type"] == "q_table":
+            if model.type == "q_table":
                 actor = lambda bs: next_next_action(model, bs, actions)
             else:
                 actor = lambda bs: ai_model_service.get_next_action(model, bs)
@@ -131,7 +131,6 @@ class PlayScreen(BaseScreen):
         potions = int(self.potions_count.text)
 
         next_enemy_list = self.enemies_options.get_enemy_list()
-        print(next_enemy_list)
         self.manager.get_screen("Game").new_game(
             actor,
             next_enemy_list,

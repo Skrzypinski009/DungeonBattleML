@@ -1,9 +1,8 @@
-from peewee import TextField
-
+from peewee import BlobField, TextField
 from .base_model import BaseModel
 
 
 class AI_Model(BaseModel):
-    type = TextField(null=False)
-    name = TextField(null=False)
-    file_name = TextField(null=False)
+    type = TextField()
+    name = TextField()
+    data = BlobField()

@@ -6,7 +6,6 @@ from db.models.actor import Actor
 from db.models.actor_type import ActorType
 from pandas import DataFrame
 from peewee import Case, ModelSelect, fn
-
 from services import action_service, battle_service
 
 
@@ -289,6 +288,7 @@ def get_avaliable_sequences(state):
     can_regen = d["regeneration_avaliable"] == 1
 
     R = action_service.ActionTypeEnum.REGENERATION
+
     sequences = action_service.action_sequences()
 
     sequences = [
@@ -304,10 +304,5 @@ def get_avaliable_sequences(state):
 
 
 def get_avaliable_sequences_ids(state):
-    avaliable_actions = []
-    sequences = action_service.action_sequences()
     avaliable_sequences = get_avaliable_sequences(state)
-    for i, seq in enumerate(sequences):
-        if seq in avaliable_sequences:
-            avaliable_actions.append(i)
-    return avaliable_actions
+    return [seq["id"] for seq in avaliable_sequences]
