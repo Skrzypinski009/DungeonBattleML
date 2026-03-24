@@ -10,6 +10,7 @@ from ui.assets.play_settings_popup import PlaySettingsPopup
 from ui.assets.screen_title import ScreenTitle
 
 from .base_screen import BaseScreen
+from ai_models.ai_model_interface import AIModelInterface
 
 
 class PlayScreen(BaseScreen):
@@ -121,12 +122,8 @@ class PlayScreen(BaseScreen):
             actor = action_service.action_default_schema
         else:
             model = ai_model_service.get_model_by_name(self.actor_spinner.text)
-            actions = []
-            # TODO: Create Model Interface
-            if model.type == "q_table":
-                actor = lambda bs: next_next_action(model, bs, actions)
-            else:
-                actor = lambda bs: ai_model_service.get_next_action(model, bs)
+            interface = AIModelInterface(model)
+            actor = interface.get_next_action
 
         potions = int(self.potions_count.text)
 
@@ -144,9 +141,3 @@ class PlayScreen(BaseScreen):
             self.play_btn.disabled = True
         else:
             self.play_btn.disabled = False
-
-
-def next_next_action(model, bs, actions: list):
-    if not actions:
-        actions.extend(ai_model_service.get_next_action(model, bs))
-    return actions.pop(0)
