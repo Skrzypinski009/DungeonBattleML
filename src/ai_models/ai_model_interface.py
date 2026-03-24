@@ -1,7 +1,13 @@
-from db.models import BattleState, AI_Model
-from services import ai_model_service, dataset_service, actor_service
 import pickle
+
 import pandas as pd
+from db.models import AI_Model, BattleState
+from services import (
+    actor_service,
+    dataset_service,
+    reinforcement_ai_service,
+    supervised_ai_service,
+)
 
 
 class AIModelInterface:
@@ -32,7 +38,7 @@ class AIModelInterface:
 
     def get_next_action_q_table(self, battle_state: BattleState):
         state = dataset_service.get_state_tuple(battle_state)
-        prediction = ai_model_service.predict_reinforcement(
+        prediction = reinforcement_ai_service.predict_reinforcement(
             self.model_instance,
             state,
         )
@@ -42,7 +48,7 @@ class AIModelInterface:
         state = dataset_service.get_state(
             battle_state,
         ).dicts()
-        prediction = ai_model_service.predict_supervised(
+        prediction = supervised_ai_service.predict_supervised(
             self.model_instance,
             pd.DataFrame(state).fillna(0),
         )

@@ -6,7 +6,12 @@ from kivy.uix.label import Label
 from kivy.uix.spinner import Spinner
 from kivy.uix.textinput import TextInput
 from pandas import DataFrame
-from services import ai_model_service, dataset_service
+from services import (
+    ai_model_service,
+    dataset_service,
+    supervised_ai_service,
+    reinforcement_ai_service,
+)
 from ui.assets.menu import MenuButton, MenuContainer
 from ui.assets.play_settings_popup import PlaySettingsPopup
 from ui.assets.screen_title import ScreenTitle
@@ -152,9 +157,11 @@ class NewModelScreen(BaseScreen):
     def train_task(self, model_type, dataset_df=None):
         train_result = None
         if dataset_df is not None:
-            train_result = ai_model_service.train_model(model_type, dataset_df)
+            train_result = supervised_ai_service.train_model(
+                model_type, dataset_df
+            )
         else:
-            train_result = ai_model_service.train_in_env(
+            train_result = reinforcement_ai_service.train_in_env(
                 model_type,
                 self.enemies_options.get_enemy_list(),
                 self.episodes_input.get_value(),

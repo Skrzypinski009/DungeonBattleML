@@ -2,6 +2,8 @@ from ai_models.game_env import GameEnv
 
 from services import dataset_service
 
+from ai_models.q_table_agent import QTableAgent
+
 
 def reinforcement_learning(
     agent, episodes: int, enemy_list: list, player_potions: int = 1
@@ -62,3 +64,27 @@ def reinforcement_learning(
 def compute_epsilon(episode, episodes_count, epsilon_start, epsilon_end):
     frac = min(episode / episodes_count, 1.0)
     return epsilon_start - frac * (epsilon_start - epsilon_end)
+
+
+def train_in_env(model_type: str, enemy_list: list, episodes: int) -> dict:
+    result = {}
+    if model_type == "q_table":
+        model = QTableAgent(GameEnv.N_STATES, GameEnv.N_ACTIONS)
+        result = reinforcement_learning(model, episodes, enemy_list)
+
+    result["type"] = model_type
+    return result
+
+
+def predict_reinforcement(model, state) -> list:
+    print("------\n\n")
+    print("state: ", state)
+    avaliable = dataset_service.get_avaliable_sequences_ids(state)
+    if len(avaliable) == 0:
+        raise Exception
+
+    print("avaliable: ", avaliable)
+    prediction = model.predict(state, avaliable)
+    print("prediction: ", prediction)
+    print("\n\n------")
+    return prediction
