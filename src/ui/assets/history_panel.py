@@ -1,7 +1,6 @@
-from ctypes import alignment
-from kivy.uix.label import Label
-from kivy.uix.boxlayout import BoxLayout
 from kivy.graphics import Color, Rectangle
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 
 
@@ -9,11 +8,11 @@ class HistoryPanel(ScrollView):
     def __init__(self):
         super().__init__()
 
-        with self.canvas.before:  # type: ignore
+        with self.canvas.before:
             Color(0, 0, 0, 1)
             self.bg = Rectangle(pos=self.pos, size=self.size)
 
-        self.bind(  # type: ignore
+        self.bind(
             pos=self.update,
             size=self.update,
         )
@@ -41,7 +40,7 @@ class HistoryPanel(ScrollView):
             height=25,
             halign="left",
         )
-        label.bind(size=label.setter("text_size"))  # pyright: ignore
+        label.bind(size=label.setter("text_size"))
         self.container.add_widget(label)
         self.container.height = len(self.container.children) * 25
 

@@ -1,9 +1,8 @@
 from typing import Callable, cast
-from peewee import fn
-from db import queries
-from db.models import GameState, Actor, BattleState, BattleHistory
-from db.models.action_type import ActionType
-from services import actor_service, battle_service, battle_history_service
+
+from db.models import BattleHistory, BattleState, GameState
+
+from services import actor_service, battle_history_service, battle_service
 
 
 def create_game(battles: int = 1, potions: int = 1) -> GameState:
@@ -33,7 +32,7 @@ def get_not_finished(game) -> BattleState | None:
     return (
         BattleState.select()
         .where(
-            BattleState.winner == None,
+            BattleState.winner is None,
             BattleState.game == game,
         )
         .first()

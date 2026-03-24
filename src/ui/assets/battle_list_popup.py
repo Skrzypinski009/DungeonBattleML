@@ -1,14 +1,13 @@
-from kivy.uix.label import Label
-from kivy.uix.button import Button
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.popup import Popup
-from kivy.uix.checkbox import CheckBox
+from typing import Callable
 
 from db.models import BattleState
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.checkbox import CheckBox
+from kivy.uix.label import Label
+from kivy.uix.popup import Popup
+from kivy.uix.scrollview import ScrollView
 from services import battle_service
-
-from typing import Callable
 
 
 class BattleListPopup(Popup):
@@ -42,8 +41,8 @@ class BattleListPopup(Popup):
             spacing=10,
         )
 
-        self.battle_list.bind(  # pyright: ignore
-            minimum_height=self.battle_list.setter("height"),  # pyright: ignore
+        self.battle_list.bind(
+            minimum_height=self.battle_list.setter("height"),
         )
 
         buttons = BoxLayout(
@@ -91,7 +90,7 @@ class BattleListPopup(Popup):
             size=(50, 50),
         )
 
-        checkbox.bind(  # pyright: ignore
+        checkbox.bind(
             active=lambda _, value: self.check_battle(value, battle.id)
         )
 

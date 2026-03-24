@@ -1,9 +1,7 @@
-from enum import Enum
 from typing import cast
-from db.models import ActionType, Actor
-from peewee import fn
 
-from db.models import BattleState
+from db.models import ActionType, Actor, BattleState
+from peewee import fn
 
 
 def get_random(energy: int):
@@ -24,16 +22,6 @@ def get_avaliable(energy: int, have_potions: bool) -> list:
     if ActionTypeEnum.REGENERATION in actions:
         if not have_potions:
             actions.remove(ActionTypeEnum.REGENERATION)
-
-    # regen_actions: list[ActionType] = [
-    # action for action in actions if action.id == ActionTypeEnum.REGENERATION.id
-    # ]
-    # regen_action = regen_actions[0] if len(regen_actions) > 0 else None
-    #
-    # if have_potions and regen_action != None:
-    # print(regen_action.name)
-    # actions.remove(regen_action)
-
     return actions
 
 
@@ -43,7 +31,7 @@ def get_avaliable_actor(actor: Actor):
 
 def get_by_name(name: str) -> ActionType:
     action = ActionType.select().where(ActionType.name == name).first()
-    if action == None:
+    if action is None:
         raise Exception(f"There is no action named '{name}'!")
     return action
 
@@ -103,9 +91,6 @@ def action_default_schema(battle_state: BattleState) -> ActionType:
     )
 
     ca_health_ratio = current_actor.health / current_actor.type.max_health
-    print(
-        f"hp ratio: {current_actor.health} / {current_actor.type.max_health} = {ca_health_ratio}"
-    )
     oa_health_ratio = other_actor.health / other_actor.type.max_health
 
     if ca_health_ratio > 0.75:
@@ -123,11 +108,11 @@ def action_default_schema(battle_state: BattleState) -> ActionType:
     return defensive_action(current_actor)
 
 
-def action_default_schema_old(current_actor: Actor, other_actor: Actor) -> ActionType:
+def action_default_schema_old(
+    current_actor: Actor,
+    other_actor: Actor,
+) -> ActionType:
     ca_health_ratio = current_actor.health / current_actor.type.max_health
-    print(
-        f"hp ratio: {current_actor.health} / {current_actor.type.max_health} = {ca_health_ratio}"
-    )
     oa_health_ratio = other_actor.health / other_actor.type.max_health
 
     if ca_health_ratio > 0.75:
@@ -138,7 +123,10 @@ def action_default_schema_old(current_actor: Actor, other_actor: Actor) -> Actio
             return neutral_action(current_actor)
         return offensive_action(current_actor)
 
-    if current_actor.potions > 0 or current_actor.last_action != ActionTypeEnum.BLOCK:
+    if (
+        current_actor.potions > 0
+        or current_actor.last_action != ActionTypeEnum.BLOCK
+    ):
         return defensive_action(current_actor)
     return neutral_action(current_actor)
 
@@ -154,7 +142,7 @@ def choose_action(actor: Actor) -> ActionType:
     action = None
     action_dict: dict[int, ActionType] = {}
 
-    while action == None:
+    while action is None:
         for i, a in enumerate(actions):
             action_dict[i + 1] = a
             print(f"{i+1}. {a.name}")

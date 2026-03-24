@@ -1,13 +1,18 @@
 from typing import Callable
+
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
-from kivy.uix.button import Button
-from kivy.uix.boxlayout import BoxLayout
 
 
 class BattleEndPopup(Popup):
     def __init__(
-        self, winner_name: str, win: bool, quit_call: Callable, finish_call: Callable
+        self,
+        winner_name: str,
+        win: bool,
+        quit_call: Callable,
+        finish_call: Callable,
     ):
         super().__init__(
             title="Koniec walki",
@@ -26,10 +31,10 @@ class BattleEndPopup(Popup):
         self.label = Label(text=f"Wygrywa: {winner_name}!")
         if win:
             self.btn = Button(text="OK", size_hint_y=None, height=40)
-            self.btn.bind(on_release=self.finish)  # pyright: ignore
+            self.btn.bind(on_release=self.finish)
         else:
             self.btn = Button(text="Wyjdź", size_hint_y=None, height=40)
-            self.btn.bind(on_release=self.go_back)  # pyright: ignore
+            self.btn.bind(on_release=self.go_back)
 
         content.add_widget(self.label)
         content.add_widget(self.btn)

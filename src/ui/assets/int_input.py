@@ -1,5 +1,3 @@
-from decimal import Clamped
-from re import sub
 from kivy.uix.textinput import TextInput
 
 

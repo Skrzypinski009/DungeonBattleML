@@ -1,8 +1,9 @@
 from typing import Callable, cast
 
-from pandas import DataFrame
-from db.models import GameState, BattleState, Actor
+from db.models import Actor, BattleState, GameState
 from db.models.battle_history import BattleHistory
+from pandas import DataFrame
+
 from services import action_service, actor_service
 from services.action_service import ActionTypeEnum
 
@@ -14,7 +15,7 @@ def create_battle(game: GameState, next_enemy_name) -> BattleState:
         .order_by(BattleState.battle_nr)
         .first()
     )
-    battle_nr = game_battle.battle_nr + 1 if game_battle != None else 1
+    battle_nr = game_battle.battle_nr + 1 if game_battle is not None else 1
 
     return BattleState.create(
         game=game,
@@ -28,7 +29,9 @@ def create_battle(game: GameState, next_enemy_name) -> BattleState:
 
 def get_battle_ids(game) -> tuple[int]:
     return tuple(
-        BattleState.select(BattleState.id).where(BattleState.game == game).distinct()
+        BattleState.select(BattleState.id)
+        .where(BattleState.game == game)
+        .distinct()
     )
 
 
@@ -43,7 +46,7 @@ def current_actor_turn(
     action_controller: Callable,
     action=None,
 ) -> BattleHistory:
-    if action == None:
+    if action is None:
         if battle.current_actor == battle.enemy:
             action = action_service.action_default_schema(battle)
         else:
@@ -81,10 +84,10 @@ def current_actor_turn(
         print(f"The winner is {battle.winner.type.name}!")
         return history
 
-    current_actor.last_action = action  # pyright: ignore
+    current_actor.last_action = action
     current_actor.save()
 
-    battle.action_nr += 1  # pyright: ignore
+    battle.action_nr += 1
     battle.save()
 
     return history
@@ -107,17 +110,17 @@ def fight(
         battle, current_actor, other_actor, actor_controller, action
     )
 
-    if battle.winner != None:
-        actor_service.energy_regen(battle.winner)  # pyright: ignore
+    if battle.winner is not None:
+        actor_service.energy_regen(battle.winner)
         return history
 
     if history.action_type in [ActionTypeEnum.BLOCK, ActionTypeEnum.NONE]:
         actor_service.energy_regen(current_actor)
-        battle.current_actor = other_actor  # pyright: ignore
-        battle.action_nr = 1  # pyright: ignore
+        battle.current_actor = other_actor
+        battle.action_nr = 1
 
         if battle.current_actor == battle.game.player:
-            battle.turn_nr += 1  # pyright: ignore
+            battle.turn_nr += 1
 
     battle.save()
     return history
@@ -128,7 +131,7 @@ def get_battles_list() -> DataFrame:
     Winner = Actor.alias()
     battles = (
         BattleState.select(
-            BattleState.id.alias("Battle ID"),  # pyright: ignore
+            BattleState.id.alias("Battle ID"),
             Enemy.type.name.alias("Enemy Type"),
             Winner.type.name.alias("Winner"),
         )
@@ -162,4 +165,4 @@ def is_enemy_turn(battle: BattleState) -> bool:
 
 
 def remove_unfinished_battles() -> None:
-    BattleState.delete().where(BattleState.winner == None).execute()
+    BattleState.delete().where(BattleState.winner is None).execute()

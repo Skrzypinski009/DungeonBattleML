@@ -1,12 +1,9 @@
-from kivy.graphics import Color, Rectangle
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.image import Image
-from kivy.uix.anchorlayout import AnchorLayout
-from kivy.uix.screenmanager import RelativeLayout
 from typing import Any
 
-from services.action_service import action_default_schema_old
+from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.image import Image
+from kivy.uix.screenmanager import RelativeLayout
 
 from .icon import Icon
 from .stat_bars import StatBars
@@ -30,7 +27,9 @@ class Enemy(BoxLayout):
             height=500,
         )
         self.image.width = (
-            self.image.height * self.image.texture_size[1] / self.image.texture_size[1]
+            self.image.height
+            * self.image.texture_size[1]
+            / self.image.texture_size[1]
         )
 
         image_anchor = AnchorLayout(

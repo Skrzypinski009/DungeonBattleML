@@ -1,6 +1,5 @@
-from .models import BattleHistory, ActorType, ActionType, BattleState, Actor
+from .models import BattleHistory, ActorType, ActionType, BattleState
 from pandas import DataFrame
-from typing import cast
 
 
 def add_last_action(history):
@@ -10,7 +9,7 @@ def add_last_action(history):
 
 
 def add_last_action_row(row, prev_row):
-    if prev_row != None:
+    if prev_row is not None:
         row["prev_action_type"] = prev_row["action_type"]
         row["prev_action_owner"] = prev_row["action_owner"]
     else:
@@ -35,7 +34,7 @@ def unpacked_battle_history_query(battle_state: BattleState):
             BattleHistory.enemy_energy,
             # action
             ActionOwner.id.alias("action_owner"),
-            ActionType.id.alias("action_type"),  # pyright: ignore
+            ActionType.id.alias("action_type"),
             # current_action
         )
         .join(
@@ -58,7 +57,7 @@ def unpacked_battle_history_query(battle_state: BattleState):
             on=(BattleHistory.battle_state == BattleState.id),
         )
         .where(
-            BattleHistory.battle_state == battle_state,  # pyright: ignore
+            BattleHistory.battle_state == battle_state,
             BattleHistory.action_owner == battle_state.game.player.type,
         )
     )

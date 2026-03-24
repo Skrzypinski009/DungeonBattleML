@@ -1,4 +1,5 @@
 from peewee import ForeignKeyField, IntegerField
+
 from .actor import Actor
 from .base_model import BaseModel
 

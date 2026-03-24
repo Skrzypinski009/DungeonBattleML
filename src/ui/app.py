@@ -1,17 +1,14 @@
-from kivy import Config
 from kivy.app import App
-from kivy.uix.screenmanager import ScreenManager
 from kivy.core.window import Window
-
+from kivy.uix.screenmanager import ScreenManager
 from services import battle_service
-from ui.base_screen import BaseScreen
 
-from .main_menu_screen import MainMenuScreen
-from .new_model_screen import NewModelScreen
-from .models_screen import ModelsScreen
-from .play_screen import PlayScreen
 from .dataset_screen import DatasetScreen
 from .game_screen import GameScreen
+from .main_menu_screen import MainMenuScreen
+from .models_screen import ModelsScreen
+from .new_model_screen import NewModelScreen
+from .play_screen import PlayScreen
 
 Window.minimum_width = 1200
 Window.minimum_height = 800

@@ -1,15 +1,10 @@
-from kivy.uix.label import Label
-from kivy.uix.button import Button
+from db.models import Dataset
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
-from kivy.uix.popup import Popup
-from kivy.uix.checkbox import CheckBox
-from numpy import spacing
-
-from db.models import Dataset, BattleState
 from services import dataset_service
-from services.battle_service import create_battle
-from ui.assets import battle_list_popup
+
 from ui.assets.battle_list_popup import BattleListPopup
 
 from .base_screen import BaseScreen
@@ -40,9 +35,7 @@ class DatasetScreen(BaseScreen):
             size_hint=(1, None),
         )
 
-        self.list_layout.bind(  # pyright: ignore
-            minimum_height=self.list_layout.setter("height")  # pyright: ignore
-        )
+        self.list_layout.bind(minimum_height=self.list_layout.setter("height"))
 
         scroll = ScrollView(
             size_hint=(None, 1),
@@ -121,9 +114,7 @@ class DatasetScreen(BaseScreen):
                     text="Usuń",
                     size_hint=(None, None),
                     size=(80, 30),
-                    on_press=lambda x: self.remove(
-                        dataset[0].dataset_nr  # pyright: ignore
-                    ),
+                    on_press=lambda x: self.remove(dataset[0].dataset_nr),
                 )
             )
             self.list_layout.add_widget(row)

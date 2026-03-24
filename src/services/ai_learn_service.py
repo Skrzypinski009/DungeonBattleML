@@ -1,5 +1,6 @@
 from ai_models.game_env import GameEnv
-from services import action_service, dataset_service
+
+from services import dataset_service
 
 
 def reinforcement_learning(
@@ -11,7 +12,9 @@ def reinforcement_learning(
         state, _ = env.reset()
         state_idx = env.state_to_idx(state)
         while True:
-            avaliable_actions = dataset_service.get_avaliable_sequences_ids(state)
+            avaliable_actions = dataset_service.get_avaliable_sequences_ids(
+                state
+            )
             action = agent.act(state_idx, avaliable_actions)
 
             next_state, reward, terminated, truncated, _ = env.step(action)

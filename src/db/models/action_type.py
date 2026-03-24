@@ -1,5 +1,6 @@
-from .base_model import BaseModel
 from peewee import IntegerField, TextField
+
+from .base_model import BaseModel
 
 
 class ActionType(BaseModel):

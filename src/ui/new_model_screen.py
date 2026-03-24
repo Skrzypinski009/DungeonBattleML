@@ -1,21 +1,18 @@
 from threading import Thread
-from joblib.memory import _build_func_identifier
+
 from kivy.base import Clock
-from kivy.lang.builder import create_handler
-from kivy.uix.label import Label
-from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.label import Label
 from kivy.uix.spinner import Spinner
 from kivy.uix.textinput import TextInput
 from pandas import DataFrame
-
 from services import ai_model_service, dataset_service
-from services.actor_service import create_random_enemy
-from ui.assets.menu import MenuContainer
+
+from ui.assets.menu import MenuButton, MenuContainer
 from ui.assets.play_settings_popup import PlaySettingsPopup
 from ui.assets.screen_title import ScreenTitle
 from ui.assets.train_popup import TrainPopup
-from ui.assets.menu import MenuButton
 
 from .base_screen import BaseScreen
 
@@ -70,7 +67,7 @@ class NewModelScreen(BaseScreen):
             font_size=20,
             hint_text="Nazwa modelu",
         )
-        self.name_input.bind(text=lambda *_: self.name_update())  # pyright: ignore
+        self.name_input.bind(text=lambda *_: self.name_update())
 
         self.form_layout = BoxLayout(
             orientation="vertical",
@@ -81,12 +78,13 @@ class NewModelScreen(BaseScreen):
         )
 
         self.model_type_spinner = Spinner(
-            values=self.supervised_model_types + self.reinforcement_model_types,
+            values=self.supervised_model_types
+            + self.reinforcement_model_types,
             size_hint=(None, None),
             size=(250, 50),
             pos_hint={"center_x": 0.5},
         )
-        self.model_type_spinner.bind(  # pyright: ignore
+        self.model_type_spinner.bind(
             text=lambda *_: self.model_type_selected()
         )
 
@@ -96,9 +94,7 @@ class NewModelScreen(BaseScreen):
             size=(250, 50),
             pos_hint={"center_x": 0.5},
         )
-        self.dataset_spinner.bind(  # pyright: ignore
-            text=lambda *_: self.dataset_selected()
-        )
+        self.dataset_spinner.bind(text=lambda *_: self.dataset_selected())
 
         self.enemies_option_btn = MenuButton(
             "Wybierz przeciwników", lambda _: self.enemies_options.open()
@@ -175,8 +171,8 @@ class NewModelScreen(BaseScreen):
         try:
             dataset_id_str = self.dataset_spinner.text.split(" ")[-1]
             dataset_id = int(dataset_id_str)
-        except:
-            # TODO: show error message
+        except Exception as e:
+            print(e.message)
             return
 
         dataset_df = DataFrame(
@@ -224,7 +220,8 @@ class NewModelScreen(BaseScreen):
             if (
                 self.model_type_spinner.text in self.supervised_model_types
                 and self.dataset_spinner.text in self.dataset_spinner.values
-                or self.model_type_spinner.text in self.reinforcement_model_types
+                or self.model_type_spinner.text
+                in self.reinforcement_model_types
             ):
                 self.train_btn.disabled = False
                 return

@@ -1,27 +1,19 @@
-from ctypes import cast
-from random import randint, random
-from typing import Callable
-from pandas import DataFrame
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import classification_report
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.neural_network import MLPClassifier
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
-from ai_models.game_env import GameEnv
-from db.models import AI_Model
+from random import randint
+
 import joblib
-import numpy as np
-
-from db.models.action_type import ActionType
-
-from db.models.battle_state import BattleState
-from db.models.game_state import GameState
-from services import actor_service, battle_service, dataset_service, game_service
-from services import action_service
-from services.action_service import ActionTypeEnum
-from services import ai_learn_service
+from ai_models.game_env import GameEnv
 from ai_models.q_table_agent import QTableAgent
+from db.models import AI_Model
+from db.models.action_type import ActionType
+from pandas import DataFrame
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report
+from sklearn.neural_network import MLPClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.tree import DecisionTreeClassifier
+
+from services import actor_service, ai_learn_service, dataset_service
 
 
 def create_ai_model(model_type: str, name: str, model):
@@ -89,7 +81,7 @@ def get_splitted_data(df: DataFrame) -> tuple:
 def simple_train(df: DataFrame, model, model_type: str) -> dict:
     df.fillna(0, inplace=True)
 
-    (X_train, X_test, y_train, y_test) = get_splitted_data(df)
+    X_train, X_test, y_train, y_test = get_splitted_data(df)
     # trenowanie
     model.fit(X_train, y_train)
     # predykcja
@@ -124,7 +116,7 @@ def train_mlp(df: DataFrame) -> dict:
             (
                 "mlp",
                 MLPClassifier(
-                    hidden_layer_sizes=(64, 32),  # dwie warstwy ukryte
+                    hidden_layer_sizes=(64, 32),
                     activation="relu",
                     solver="adam",
                     max_iter=500,
@@ -193,3 +185,8 @@ def predict_reinforcement(model, state) -> list:
 
 def remove_model(id: int):
     AI_Model.delete().where(AI_Model.id == id).execute()
+
+
+class AIModelInterface:
+    def __init__(self, model):
+        pass

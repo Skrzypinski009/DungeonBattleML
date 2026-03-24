@@ -1,5 +1,5 @@
-from kivy.uix.progressbar import ProgressBar
 from kivy.graphics import Color, Rectangle
+from kivy.uix.progressbar import ProgressBar
 
 
 class StatBar(ProgressBar):
@@ -11,7 +11,7 @@ class StatBar(ProgressBar):
         )
 
         self.color = color
-        with self.canvas:  # type: ignore
+        with self.canvas:
             Color(0.8, 0.8, 0.8, 1)
             self.border = Rectangle(pos=self.pos, size=self.size)
 
@@ -21,9 +21,7 @@ class StatBar(ProgressBar):
             Color(*color)
             self.fg = Rectangle(pos=self.pos, size=self.size)
 
-        self.bind(  # type: ignore
-            pos=self._update, size=self._update, value=self._update
-        )
+        self.bind(pos=self._update, size=self._update, value=self._update)
 
     def _update(self, *args):
         pos = (self.pos[0] + 1, self.pos[1] + 1)

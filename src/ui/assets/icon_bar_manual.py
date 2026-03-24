@@ -1,6 +1,6 @@
-from kivy.uix.relativelayout import RelativeLayout
-from kivy.uix.image import Image
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.image import Image
+from kivy.uix.relativelayout import RelativeLayout
 
 from .icon import Icon
 
@@ -19,7 +19,7 @@ class IconBarManual(RelativeLayout):
         self.height = self.icon_size
 
         self.icon_selection = Image(
-            source=f"img/skill_icon_select.png",
+            source="img/skill_icon_select.png",
             size_hint_x=None,
             size_hint_y=None,
             width=self.icon_size,

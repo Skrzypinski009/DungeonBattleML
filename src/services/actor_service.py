@@ -1,7 +1,9 @@
-from db.models import Actor, ActorType, ActionType, BattleHistory, BattleState
+import math
 from random import choice
 from typing import cast
-import math
+
+from db.models import ActionType, Actor, ActorType, BattleState
+
 from services.action_service import ActionTypeEnum
 
 
@@ -28,19 +30,21 @@ def take_damage(actor: Actor, damage: int) -> None:
         print(f"Blocked damage: {blocked_dmg}")
 
     print(f"[{actor.type.name}] taking {str(damage)} damage")
-    actor.health = max(actor.health - damage, 0)  # pyright: ignore
+    actor.health = max(actor.health - damage, 0)
     actor.save()
 
 
 def energy_regen(actor: Actor) -> None:
-    actor.energy = min(  # pyright: ignore
+    actor.energy = min(
         cast(int, actor.energy + 4),
         actor.type.max_energy,
     )
     actor.save()
 
 
-def perform_action(actor: Actor, action: ActionType, enemy: Actor, battle: BattleState):
+def perform_action(
+    actor: Actor, action: ActionType, enemy: Actor, battle: BattleState
+):
     print(
         f"[{actor.type.name}]: "
         + f"action: {action.name}, "
@@ -54,7 +58,7 @@ def perform_action(actor: Actor, action: ActionType, enemy: Actor, battle: Battl
 
     match action_name:
         case "regeneration":
-            actor.health = actor.type.max_health  # pyright: ignore
+            actor.health = actor.type.max_health
             actor.potions -= 1
             actor.save()
 

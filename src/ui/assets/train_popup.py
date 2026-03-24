@@ -1,9 +1,11 @@
 from typing import Callable
-from kivy.uix.bubble import BoxLayout, RelativeLayout
+
+from kivy.uix.bubble import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.modalview import AnchorLayout
 from kivy.uix.popup import Popup
+
 from .loading_circle import LoadingCircle
 
 

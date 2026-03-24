@@ -1,10 +1,8 @@
-# kivy
-from kivy.uix.button import Button
-from kivy.uix.relativelayout import RelativeLayout
-from kivy.uix.image import Image
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.image import Image
+from kivy.uix.relativelayout import RelativeLayout
 
-# other
 from .icon import Icon
 
 
@@ -24,7 +22,7 @@ class IconBar(RelativeLayout):
         self.height = self.icon_size
 
         self.icon_selection = Image(
-            source=f"img/skill_icon_select.png",
+            source="img/skill_icon_select.png",
             size_hint_x=None,
             size_hint_y=None,
             width=self.icon_size,
@@ -91,11 +89,11 @@ class IconBar(RelativeLayout):
         self.button4 = self.create_overlay_button()
         self.end_button = self.create_end_turn_button()
 
-        self.button1.bind(on_press=self.action_1_selected)  # pyright: ignore
-        self.button2.bind(on_press=self.action_2_selected)  # pyright: ignore
-        self.button3.bind(on_press=self.action_3_selected)  # pyright: ignore
-        self.button4.bind(on_press=self.action_4_selected)  # pyright: ignore
-        self.end_button.bind(on_press=self.end_turn)  # pyright: ignore
+        self.button1.bind(on_press=self.action_1_selected)
+        self.button2.bind(on_press=self.action_2_selected)
+        self.button3.bind(on_press=self.action_3_selected)
+        self.button4.bind(on_press=self.action_4_selected)
+        self.end_button.bind(on_press=self.end_turn)
 
         button_overlay.add_widget(self.button1)
         button_overlay.add_widget(self.button2)
@@ -112,7 +110,7 @@ class IconBar(RelativeLayout):
         self.disable_all(True)
         self.select_icon(nr)
         print(f"Action {nr} selected")
-        self.action_call(nr)  # pyright: ignore
+        self.action_call(nr)
 
     def action_1_selected(self, *_):
         self.action_selected(1)
@@ -147,7 +145,7 @@ class IconBar(RelativeLayout):
             width=self.icon_size,
             height=self.icon_size,
             pos_hint={"center_x": 0.5, "center_y": 0.5},
-            background_color=(0, 0, 0, 1),  # Fully transparent
+            background_color=(0, 0, 0, 1),
         )
 
     def mode(self, is_manual: bool):

@@ -1,5 +1,6 @@
-from peewee import SqliteDatabase
 import os
+
+from peewee import SqliteDatabase
 
 
 class DatabaseManager:
@@ -9,14 +10,14 @@ class DatabaseManager:
     def get_database(cls) -> SqliteDatabase:
         return cls.db
 
-    @classmethod
-    def is_exist(cls) -> bool:
+    @staticmethod
+    def is_exist() -> bool:
         if os.path.exists("data/app.db"):
             return True
         return False
 
-    @classmethod
-    def delete_database(cls) -> None:
+    @staticmethod
+    def delete_database() -> None:
         os.remove("data/app.db")
 
     @classmethod

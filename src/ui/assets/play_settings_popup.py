@@ -1,12 +1,7 @@
-from ctypes import cast
 from kivy.uix.bubble import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.dropdown import ScrollView
-from kivy.uix.label import Label
 from kivy.uix.popup import Popup
-from kivy.uix.spinner import Spinner
-from kivy.uix.textinput import TextInput
-
 from ui.assets.enemy_panel import EnemySelectPanel
 
 
@@ -91,7 +86,7 @@ class PlaySettingsPopup(Popup):
         # copy of children for safe deleting
         children = [child for child in self.enemies_layout.children]
         for child in children:
-            if child.get_enemy_name() == None:
+            if child.get_enemy_name() is None:
                 self.enemies_layout.remove_widget(child)
         self.update_height()
 

@@ -1,7 +1,7 @@
-from stable_baselines3 import PPO
 import gymnasium as gym
-from gymnasium import spaces
 import numpy as np
+from gymnasium import spaces
+from stable_baselines3 import PPO
 
 
 class MyEnv(gym.Env):

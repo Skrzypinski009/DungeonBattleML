@@ -1,6 +1,5 @@
-from numpy._core.numeric import full
-from db.queries import unpacked_battle_history_df
 from db.models import BattleHistory, BattleState
+
 from services.action_service import ActionTypeEnum
 
 
@@ -13,8 +12,7 @@ def get_history_battle(battle: BattleState):
 
 
 def prev_history_select(battle_state: BattleState):
-    return (
-    )
+    return ()
 
 
 def get_prev_history_row(history: BattleHistory):
@@ -77,7 +75,7 @@ def damage_log(
     # Enemy taking damage
     if player.type == history.action_owner:
         name = enemy.type.name
-        if prev_history == None:
+        if prev_history is None:
             dmg = enemy.type.max_health - history.enemy_health
         else:
             dmg = prev_history.enemy_health - history.enemy_health
@@ -85,7 +83,7 @@ def damage_log(
     # Player taking damage
     elif enemy.type == history.action_owner:
         name = player.type.name
-        if prev_history == None:
+        if prev_history is None:
             dmg = player.type.max_health - history.player_health
         else:
             dmg = prev_history.player_health - history.player_health
@@ -100,10 +98,12 @@ def is_current_actor_changed(battle: BattleState):
         return
 
     last_history_row: BattleHistory = full_history.first()
-    prev_history_row: BattleHistory | None = get_prev_history_row(last_history_row)
+    prev_history_row: BattleHistory | None = get_prev_history_row(
+        last_history_row
+    )
 
     if (
-        prev_history_row == None
+        prev_history_row is None
         or last_history_row.action_owner == prev_history_row.action_owner
     ):
         return False

@@ -1,6 +1,6 @@
-from kivy.uix.image import Image
-from kivy.graphics import PushMatrix, PopMatrix, Rotate
 from kivy.clock import Clock
+from kivy.graphics import PopMatrix, PushMatrix, Rotate
+from kivy.uix.image import Image
 
 
 class LoadingCircle(Image):
@@ -8,14 +8,14 @@ class LoadingCircle(Image):
         super().__init__(source="img/loading_circle.png", **kwargs)
         self.angle = 0
 
-        with self.canvas.before:  # pyright: ignore
+        with self.canvas.before:
             PushMatrix()
             self.rot = Rotate(angle=0, origin=self.center)
 
-        with self.canvas.after:  # pyright: ignore
+        with self.canvas.after:
             PopMatrix()
 
-        self.bind(  # pyright: ignore
+        self.bind(
             pos=self.update_origin,
             size=self.update_origin,
         )

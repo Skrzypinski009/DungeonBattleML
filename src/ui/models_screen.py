@@ -1,9 +1,7 @@
-from kivy.uix.label import Label
-from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.spinner import Spinner
+from kivy.uix.button import Button
+from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
-
 from services import ai_model_service
 
 from .base_screen import BaseScreen
@@ -34,9 +32,7 @@ class ModelsScreen(BaseScreen):
             size_hint=(1, None),
         )
 
-        self.list_layout.bind(  # pyright: ignore
-            minimum_height=self.list_layout.setter("height")  # pyright: ignore
-        )
+        self.list_layout.bind(minimum_height=self.list_layout.setter("height"))
 
         scroll = ScrollView(
             size_hint=(None, 1),
@@ -111,7 +107,7 @@ class ModelsScreen(BaseScreen):
                     text="Usuń",
                     size_hint=(None, None),
                     size=(80, 30),
-                    on_press=lambda x: self.remove(model["id"]),  # pyright: ignore
+                    on_press=lambda x: self.remove(model["id"]),
                 )
             )
             self.list_layout.add_widget(row)
