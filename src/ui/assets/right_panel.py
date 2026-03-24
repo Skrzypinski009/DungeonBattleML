@@ -38,8 +38,8 @@ class ControlButtons(BoxLayout):
             operation(self.play_btn)
             operation(self.next_btn)
             operation(self.pause_btn)
-        except:
-            pass
+        except Exception as e:
+            print(e)
 
         self.height = 40 * len(self.children)
 

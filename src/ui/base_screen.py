@@ -1,7 +1,4 @@
-from kivy.uix.screenmanager import (
-    Screen,
-    SlideTransition,
-)
+from kivy.uix.screenmanager import Screen, SlideTransition
 
 
 class BaseScreen(Screen):

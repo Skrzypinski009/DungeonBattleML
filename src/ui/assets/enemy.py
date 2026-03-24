@@ -1,19 +1,16 @@
-from kivy.graphics import Color, Rectangle
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.image import Image
-from kivy.uix.anchorlayout import AnchorLayout
-from kivy.uix.screenmanager import RelativeLayout
 from typing import Any
 
-from services.action_service import action_default_schema_old
+from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.image import Image
+from kivy.uix.screenmanager import RelativeLayout
 
 from .icon import Icon
 from .stat_bars import StatBars
 
 
 class Enemy(BoxLayout):
-    def __init__(self, stats: dict[str, dict[str, Any]], image_path: str):
+    def __init__(self, stats: dict[str, dict[str, Any]], enemy_name: str):
         super().__init__(
             orientation="vertical",
             size_hint_x=None,
@@ -23,14 +20,17 @@ class Enemy(BoxLayout):
         )
         self.stat_bars = StatBars()
         self.stat_bars.set(stats)
+        print(enemy_name)
         self.image = Image(
-            source="img/enemy.png",
+            source=f"img/{enemy_name}.png",
             size_hint_x=None,
             size_hint_y=None,
             height=500,
         )
         self.image.width = (
-            self.image.height * self.image.texture_size[1] / self.image.texture_size[1]
+            self.image.height
+            * self.image.texture_size[1]
+            / self.image.texture_size[1]
         )
 
         image_anchor = AnchorLayout(

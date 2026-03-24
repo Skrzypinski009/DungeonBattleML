@@ -1,7 +1,9 @@
-from db.models import Actor, ActorType, ActionType, BattleHistory, BattleState
+import math
 from random import choice
 from typing import cast
-import math
+
+from db.models import ActionType, Actor, ActorType
+
 from services.action_service import ActionTypeEnum
 
 
@@ -28,46 +30,42 @@ def take_damage(actor: Actor, damage: int) -> None:
         print(f"Blocked damage: {blocked_dmg}")
 
     print(f"[{actor.type.name}] taking {str(damage)} damage")
-    actor.health = max(actor.health - damage, 0)  # pyright: ignore
+    actor.health = max(actor.health - damage, 0)
     actor.save()
 
 
 def energy_regen(actor: Actor) -> None:
-    actor.energy = min(  # pyright: ignore
+    actor.energy = min(
         cast(int, actor.energy + 4),
         actor.type.max_energy,
     )
     actor.save()
 
 
-def perform_action(actor: Actor, action: ActionType, enemy: Actor, battle: BattleState):
-    print(
-        f"[{actor.type.name}]: "
-        + f"action: {action.name}, "
-        + f"health: {actor.health} "
-        + f"energy: {actor.energy}"
-    )
-    actor_type = cast(ActorType, actor.type)
+def perform_action(
+    current_actor: Actor, action: ActionType, other_actor: Actor
+) -> None:
+    current_actor_type = cast(ActorType, current_actor.type)
     action_name = cast(str, action.name)
 
-    actor.energy -= action.energy_cost
+    current_actor.energy -= action.energy_cost
 
     match action_name:
         case "regeneration":
-            actor.health = actor.type.max_health  # pyright: ignore
-            actor.potions -= 1
-            actor.save()
+            current_actor.health = current_actor.type.max_health
+            current_actor.potions -= 1
+            current_actor.save()
 
         case "attack":
             take_damage(
-                enemy,
-                math.floor(cast(float, actor_type.attack_damage)),
+                other_actor,
+                math.floor(cast(float, current_actor_type.attack_damage)),
             )
 
         case "heavy attack":
             take_damage(
-                enemy,
-                math.floor(cast(float, actor_type.attack_damage * 2)),
+                other_actor,
+                math.floor(cast(float, current_actor_type.attack_damage * 2)),
             )
 
 

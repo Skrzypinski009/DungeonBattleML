@@ -1,5 +1,4 @@
 from kivy.uix.boxlayout import BoxLayout
-from kivy.graphics import Canvas, Color, Rectangle
 from kivy.uix.label import Label
 
 from .stat_bar import StatBar
@@ -24,9 +23,9 @@ class StatBarWrapper(BoxLayout):
 
         name_label = Label(text=stat_name, **label_settings)
         self.stat_bar = stat_bar
-        self.value_label = Label(text=f"", **label_settings)
+        self.value_label = Label(text="", **label_settings)
 
-        self.stat_bar.bind(value=self._update)  # type: ignore
+        self.stat_bar.bind(value=self._update)
 
         self.add_widget(name_label)
         self.add_widget(self.stat_bar)
@@ -34,4 +33,6 @@ class StatBarWrapper(BoxLayout):
         self._update(None, None)
 
     def _update(self, *_):
-        self.value_label.text = f"{int(self.stat_bar.value)}/{int(self.stat_bar.max)}"
+        self.value_label.text = (
+            f"{int(self.stat_bar.value)}/{int(self.stat_bar.max)}"
+        )

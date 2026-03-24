@@ -1,15 +1,21 @@
-from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+
+
+menu_widget_settings = {
+    "size_hint": (None, None),
+    "size": (300, 55),
+    "pos_hint": {"center_x": 0.5},
+}
 
 
 class MenuButton(Button):
-    def __init__(self, text, callback):
+    def __init__(self, text, callback, **kwargs):
         super().__init__(
             text=text,
-            size_hint=(None, None),
-            size=(300, 55),
-            pos_hint={"center_x": 0.5},
             on_press=callback,
+            **menu_widget_settings,
+            **kwargs,
         )
 
 

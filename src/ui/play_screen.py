@@ -1,21 +1,13 @@
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.label import Label
-from kivy.uix.button import Button
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.spinner import Spinner
-from kivy.uix.textinput import TextInput
+from services import action_service, ai_model_service, battle_service
 
-from ui.assets.enemy import Enemy
 from ui.assets.int_input import IntInput
 from ui.assets.menu import MenuButton, MenuContainer
 from ui.assets.play_settings_popup import PlaySettingsPopup
 from ui.assets.screen_title import ScreenTitle
-
-from services import (
-    ai_model_service,
-    action_service,
-    battle_service,
-)
 
 from .base_screen import BaseScreen
 
@@ -34,7 +26,6 @@ class PlayScreen(BaseScreen):
     def load(self):
         battle_service.remove_unfinished_battles()
         self.load_ai_models()
-        # self.battles_count.text = "1"
         self.potions_count.text = "1"
         self.actor_spinner.text = "Wybierz Aktora"
 
@@ -47,9 +38,7 @@ class PlayScreen(BaseScreen):
             size=(300, 55),
             pos_hint={"center_x": 0.5},
         )
-        self.actor_spinner.bind(  # pyright: ignore
-            text=lambda *_: self.actor_selected()
-        )
+        self.actor_spinner.bind(text=lambda *_: self.actor_selected())
         self.enemies_options = PlaySettingsPopup()
         self.enemies_options.add_enemy("rat")
 
@@ -106,14 +95,16 @@ class PlayScreen(BaseScreen):
         layout.add_widget(self.potions_count)
         layout.add_widget(save_layout)
         layout.add_widget(self.play_btn)
-        layout.add_widget(MenuButton("Powrót", lambda x: self.go("MainMenu", "right")))
+        layout.add_widget(
+            MenuButton("Powrót", lambda x: self.go("MainMenu", "right"))
+        )
         layout.add_widget(Label())
 
         self.add_widget(layout)
 
     def load_ai_models(self):
-        self.models = ai_model_service.get_all_ai_models()
-        self.model_names = [model["name"] for model in self.models]
+        self.models = ai_model_service.get_ai_models()
+        self.model_names = [model.name for model in self.models]
 
         self.actor_spinner.values = [
             "Gracz",
@@ -131,7 +122,8 @@ class PlayScreen(BaseScreen):
         else:
             model = ai_model_service.get_model_by_name(self.actor_spinner.text)
             actions = []
-            if model["type"] == "q_table":
+            # TODO: Create Model Interface
+            if model.type == "q_table":
                 actor = lambda bs: next_next_action(model, bs, actions)
             else:
                 actor = lambda bs: ai_model_service.get_next_action(model, bs)
@@ -139,7 +131,6 @@ class PlayScreen(BaseScreen):
         potions = int(self.potions_count.text)
 
         next_enemy_list = self.enemies_options.get_enemy_list()
-        print(next_enemy_list)
         self.manager.get_screen("Game").new_game(
             actor,
             next_enemy_list,

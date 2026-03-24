@@ -1,4 +1,5 @@
 from typing import Callable
+
 from kivy.uix.bubble import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.spinner import Spinner
@@ -45,7 +46,7 @@ class EnemySelectPanel(BoxLayout):
         self.delete_btn.disabled = disabled
 
     def bind_remove_btn(self, remove_call: Callable):
-        self.delete_btn.bind(  # pyright: ignore
+        self.delete_btn.bind(
             on_press=remove_call,
         )
 

@@ -1,6 +1,7 @@
-from kivy.graphics import Canvas, Color, Rectangle
-from kivy.uix.boxlayout import BoxLayout
 from typing import Any
+
+from kivy.uix.boxlayout import BoxLayout
+
 from .stat_bar import StatBar
 from .stat_bar_wrapper import StatBarWrapper
 

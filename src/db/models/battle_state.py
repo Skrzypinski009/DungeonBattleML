@@ -1,9 +1,10 @@
 from db.models.action_type import ActionType
 from db.models.game_state import GameState
-from .actor import Actor
-from .base_model import BaseModel
-from .actor_type import ActorType
 from peewee import ForeignKeyAccessor, ForeignKeyField, IntegerField
+
+from .actor import Actor
+from .actor_type import ActorType
+from .base_model import BaseModel
 
 
 class BattleState(BaseModel):
@@ -16,7 +17,7 @@ class BattleState(BaseModel):
     winner = ForeignKeyField(Actor, null=True)
 
     def __str__(self) -> str:
-        s = f"BattleState id: {str(self.id)}, \n"  # pyright: ignore
+        s = f"BattleState id: {str(self.id)}, \n"
         s += f"battle_nr: {str(self.battle_nr)}, \n"
         s += f"round_nr: {str(self.turn_nr)}, \n"
         s += f"current_actor: {str(self.current_actor)}, \n"

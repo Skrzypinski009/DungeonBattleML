@@ -17,12 +17,14 @@ class QTableAgent:
 
         if np.random.rand() < self.epsilon:
             action = np.random.choice(legal_actions)
-            return GameEnv.SEQUENCES[action]["sequence"]
+            return action
+            # return GameEnv.SEQUENCES[action]["sequence"]
 
         q_values = self.Q[state_idx, legal_actions]
         best_idx = np.argmax(q_values)
         action = legal_actions[best_idx]
-        return GameEnv.SEQUENCES[action]["sequence"]
+        return action
+        # return GameEnv.SEQUENCES[action]["sequence"]
 
     def learn(self, state_idx, action, reward, next_state_idx, terminated):
         if terminated:
@@ -30,8 +32,16 @@ class QTableAgent:
         else:
             target = reward + self.gamma * np.max(self.Q[next_state_idx])
 
+        print("\n\n\n\n")
+        print(state_idx)
+        print(action)
+        print("\n\n\n\n")
         self.Q[state_idx, action] += self.alpha * (target - self.Q[state_idx, action])
 
     def predict(self, state, legal_actions=None):
         state_idx = GameEnv.state_to_idx(state)
-        return self.act(state_idx, legal_actions)
+        action = self.act(state_idx, legal_actions)
+        return self.get_sequence(action)
+
+    def get_sequence(self, action):
+        return GameEnv.SEQUENCES[action]["sequence"]

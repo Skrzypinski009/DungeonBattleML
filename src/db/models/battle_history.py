@@ -1,8 +1,8 @@
-from peewee import ForeignKeyField, IntegerField, BooleanField
-from .base_model import BaseModel
-from .actor import Actor
-from .actor_type import ActorType
+from peewee import ForeignKeyField, IntegerField
+
 from .action_type import ActionType
+from .actor_type import ActorType
+from .base_model import BaseModel
 from .battle_state import BattleState
 
 

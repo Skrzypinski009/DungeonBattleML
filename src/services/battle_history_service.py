@@ -1,6 +1,5 @@
-from numpy._core.numeric import full
-from db.queries import unpacked_battle_history_df
 from db.models import BattleHistory, BattleState
+
 from services.action_service import ActionTypeEnum
 
 
@@ -9,11 +8,6 @@ def get_history_battle(battle: BattleState):
         BattleHistory.select()
         .where(BattleHistory.battle_state == battle)
         .order_by(BattleHistory.action_nr.desc())
-    )
-
-
-def prev_history_select(battle_state: BattleState):
-    return (
     )
 
 
@@ -31,26 +25,32 @@ def get_prev_history_row(history: BattleHistory):
     return None
 
 
-def history_log(history: BattleHistory, current_battle: BattleState):
+def history_log(current_battle: BattleState):
     logs: list[str] = []
 
-    prev_history_select = BattleHistory.select().where(
-        BattleHistory.battle_state == current_battle,
-    )
+    prev_history_select = (
+        BattleHistory.select()
+        .where(
+            BattleHistory.battle_state == current_battle,
+        )
+        .order_by(BattleHistory.id.desc())
+        .limit(1)
+    ).execute()
+
     prev_history = None
-    if len(prev_history_select) > 1:
-        prev_history = prev_history_select[-2]
+    if len(prev_history_select) > 0:
+        prev_history = prev_history_select[-1]
 
-    action_owner_name = history.action_owner.name
+    action_owner_name = prev_history.action_owner.name
 
-    match history.action_type:
+    match prev_history.action_type:
         case ActionTypeEnum.ATTACK:
             logs.append(f"[{action_owner_name}] Wykonuje atak")
-            logs.append(damage_log(history, prev_history, current_battle))
+            logs.append(damage_log(prev_history, current_battle))
 
         case ActionTypeEnum.HEAVY_ATTACK:
             logs.append(f"[{action_owner_name}] Wykonuje silny atak")
-            logs.append(damage_log(history, prev_history, current_battle))
+            logs.append(damage_log(prev_history, current_battle))
 
         case ActionTypeEnum.BLOCK:
             logs.append(f"[{action_owner_name}] Blokuje następny atak")
@@ -64,7 +64,6 @@ def history_log(history: BattleHistory, current_battle: BattleState):
 
 
 def damage_log(
-    history: BattleHistory,
     prev_history: BattleHistory | None,
     current_battle: BattleState,
 ):
@@ -75,20 +74,20 @@ def damage_log(
     enemy = current_battle.enemy
 
     # Enemy taking damage
-    if player.type == history.action_owner:
+    if player.type == prev_history.action_owner:
         name = enemy.type.name
-        if prev_history == None:
-            dmg = enemy.type.max_health - history.enemy_health
+        if prev_history is None:
+            dmg = enemy.type.max_health - enemy.health
         else:
-            dmg = prev_history.enemy_health - history.enemy_health
+            dmg = prev_history.enemy_health - enemy.health
 
     # Player taking damage
-    elif enemy.type == history.action_owner:
+    elif enemy.type == prev_history.action_owner:
         name = player.type.name
-        if prev_history == None:
-            dmg = player.type.max_health - history.player_health
+        if prev_history is None:
+            dmg = player.type.max_health - player.health
         else:
-            dmg = prev_history.player_health - history.player_health
+            dmg = prev_history.player_health - player.health
 
     return f"[{name}] Otrzymuje {dmg} punktów obrażeń"
 
@@ -100,10 +99,12 @@ def is_current_actor_changed(battle: BattleState):
         return
 
     last_history_row: BattleHistory = full_history.first()
-    prev_history_row: BattleHistory | None = get_prev_history_row(last_history_row)
+    prev_history_row: BattleHistory | None = get_prev_history_row(
+        last_history_row
+    )
 
     if (
-        prev_history_row == None
+        prev_history_row is None
         or last_history_row.action_owner == prev_history_row.action_owner
     ):
         return False

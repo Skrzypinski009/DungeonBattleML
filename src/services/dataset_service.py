@@ -1,13 +1,12 @@
-from pandas import DataFrame
-from peewee import Case, ModelSelect, fn
-from db.models import Dataset, GameState, BattleState, BattleHistory
+from typing import Iterable
+
+from db.models import BattleHistory, BattleState, Dataset, GameState
 from db.models.action_type import ActionType
 from db.models.actor import Actor
 from db.models.actor_type import ActorType
-from db.queries import unpacked_battle_history_df
-from services import action_service, battle_history_service, battle_service
-
-from typing import Iterable
+from pandas import DataFrame
+from peewee import Case, ModelSelect, fn
+from services import action_service, battle_service
 
 
 def dataset_query(battle: BattleState):
@@ -17,7 +16,9 @@ def dataset_query(battle: BattleState):
     Player = Actor.alias()
 
     # kolejny dataset_nr
-    next_dataset_nr = Dataset.select((fn.COALESCE(fn.MAX(Dataset.dataset_nr), 0) + 1))
+    next_dataset_nr = Dataset.select(
+        (fn.COALESCE(fn.MAX(Dataset.dataset_nr), 0) + 1)
+    )
 
     attack_avaliable = Case(None, ((Player.energy >= 4, 1),), 0).alias(
         "attack_avaliable"
@@ -25,7 +26,9 @@ def dataset_query(battle: BattleState):
     heavy_attack_avaliable = Case(None, ((Player.energy >= 6, 1),), 0).alias(
         "heavy_attack_avaliable"
     )
-    block_avaliable = Case(None, ((Player.energy >= 2, 1),), 0).alias("block_avaliable")
+    block_avaliable = Case(None, ((Player.energy >= 2, 1),), 0).alias(
+        "block_avaliable"
+    )
     regeneration_avaliable = Case(None, ((Player.energy >= 3, 1),), 0).alias(
         "regeneration_avaliable"
     )
@@ -102,7 +105,9 @@ def get_state(battle: BattleState):
     heavy_attack_avaliable = Case(None, ((Player.energy >= 6, 1),), 0).alias(
         "heavy_attack_avaliable"
     )
-    block_avaliable = Case(None, ((Player.energy >= 2, 1),), 0).alias("block_avaliable")
+    block_avaliable = Case(None, ((Player.energy >= 2, 1),), 0).alias(
+        "block_avaliable"
+    )
     regeneration_avaliable = Case(
         None, (((Player.energy >= 3) & (Player.potions > 0), 1),), 0
     ).alias("regeneration_avaliable")
@@ -179,7 +184,9 @@ def state_to_dict(state):
 
 
 def create_dataset_from_battle_ids(battle_ids: Iterable) -> tuple[Dataset]:
-    battles: list[BattleState] = [battle_service.get_battle(id) for id in battle_ids]
+    battles: list[BattleState] = [
+        battle_service.get_battle(id) for id in battle_ids
+    ]
     print(len(battles))
     union = dataset_query(battles[0])
     print(union.count())
@@ -270,32 +277,32 @@ def get_dataset_tuple(dataset: Dataset) -> tuple:
 
 def get_avaliable_actions_by_state(state) -> list:
     d = state_to_dict(state)
-    return action_service.get_avaliable(d["player_energy"], d["regeneration_avaliable"])
+    return action_service.get_avaliable(
+        d["player_energy"], d["regeneration_avaliable"]
+    )
 
 
 def get_avaliable_sequences(state):
     d = state_to_dict(state)
     player_energy = d["player_energy"]
     can_regen = d["regeneration_avaliable"] == 1
+
     R = action_service.ActionTypeEnum.REGENERATION
 
-    avaliable_actions = action_service.get_avaliable(player_energy, can_regen)
     sequences = action_service.action_sequences()
-    avaliable_sequences = []
 
-    sequences = [s_dict for s_dict in sequences if s_dict["cost"] <= player_energy]
+    sequences = [
+        s_dict for s_dict in sequences if s_dict["cost"] <= player_energy
+    ]
 
     if not can_regen:
-        sequences = [s_dict for s_dict in sequences if R not in s_dict["sequence"]]
+        sequences = [
+            s_dict for s_dict in sequences if R not in s_dict["sequence"]
+        ]
 
     return sequences
 
 
 def get_avaliable_sequences_ids(state):
-    avaliable_actions = []
-    sequences = action_service.action_sequences()
     avaliable_sequences = get_avaliable_sequences(state)
-    for i, seq in enumerate(sequences):
-        if seq in avaliable_sequences:
-            avaliable_actions.append(i)
-    return avaliable_actions
+    return [seq["id"] for seq in avaliable_sequences]

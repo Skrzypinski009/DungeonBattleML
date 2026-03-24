@@ -1,39 +1,23 @@
-# kivy
-from kivy.uix.image import Image
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.anchorlayout import AnchorLayout
-from kivy.uix.screenmanager import RelativeLayout
+from threading import Thread
+from time import sleep
+from typing import Callable, cast
+
+from db.models import ActionType, Actor, BattleHistory, BattleState, GameState
 from kivy.clock import Clock
-
-from ui.play_screen import PlayScreen
-
-# ui assets
-from .assets.battle_title import BattleTitle
-from .assets.icon_bar import IconBar
-from .assets.stat_bars import StatBars
-from .assets.enemy import Enemy, EnemyWrapper
-from .assets.right_panel import RightPanel
-from ui.assets.battle_end_popup import BattleEndPopup
-
-# db models
-from db.models import GameState, Actor, BattleHistory, ActionType, BattleState
-from db.models.actor_type import ActorType
-
-# services
-from services import (
-    action_service,
-    battle_history_service,
-    battle_service,
-    game_service,
-    actor_service,
-)
+from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.image import Image
+from kivy.uix.screenmanager import RelativeLayout
+from services import action_service, battle_service, game_service
 from services.action_service import ActionTypeEnum
 
-# core
-from typing import Callable, cast
-from time import sleep
-from threading import Thread
+from ui.assets.battle_end_popup import BattleEndPopup
 
+from .assets.battle_title import BattleTitle
+from .assets.enemy import Enemy, EnemyWrapper
+from .assets.icon_bar import IconBar
+from .assets.right_panel import RightPanel
+from .assets.stat_bars import StatBars
 from .base_screen import BaseScreen
 
 
@@ -55,18 +39,20 @@ class GameScreen(BaseScreen):
     def build_ui(self):
         main_layout = BoxLayout(orientation="horizontal", padding=20)
         inner_layout = RelativeLayout(size_hint_x=1, size_hint_y=1)
-        self.right_panel = RightPanel(self.play, self.next, self.pause, self.quit)
+        self.right_panel = RightPanel(
+            self.play, self.next, self.pause, self.quit
+        )
         self.history_panel = self.right_panel.history_panel
 
         background = Image(
-            source="img/background.jpg",
+            source="img/background.png",
             size_hint=(None, None),
             width=1920,
             height=1080,
             pos_hint={"center_x": 0.5, "center_y": 0.5},
         )
 
-        battle_title = BattleTitle("Battle 1")
+        battle_title = BattleTitle("Walka")
 
         self.icon_bar = IconBar(self.next_action)
         self.stat_bar = StatBars()
@@ -106,7 +92,7 @@ class GameScreen(BaseScreen):
         self.right_panel.control_buttons.mode(is_manual)
 
     def play(self, *_) -> None:
-        if self.game == None:
+        if self.game is None:
             print("game is None")
             return
 
@@ -116,13 +102,13 @@ class GameScreen(BaseScreen):
             Thread(target=self.full_auto_mode, daemon=True).start()
 
     def next(self, *_) -> None:
-        if self.game == None or not self.paused:
+        if self.game is None or not self.paused:
             return
 
         Thread(target=self.one_action_mode, daemon=True).start()
 
     def pause(self, *_) -> None:
-        if self.game == None:
+        if self.game is None:
             return
 
         self.paused = True
@@ -144,7 +130,7 @@ class GameScreen(BaseScreen):
         self.actor_controller = actor_controller
         self.next_enemy_list = next_enemy_list
 
-        if self.actor_controller == None:
+        if self.actor_controller is None:
             self.set_ui_manual_mode(True)
         else:
             self.set_ui_manual_mode(False)
@@ -166,16 +152,20 @@ class GameScreen(BaseScreen):
                 "color": (0, 0, 1, 1),
             },
         }
+        next_enemy = self.next_enemy_list.pop()
+        print(next_enemy)
         self.stat_bar.set(stats)
-        self.new_battle(self.next_enemy_list.pop())
+        self.new_battle(next_enemy)
         self.icon_bar.enabled_icons([1, 2, 3, 4])
         self.icon_bar.select_icon(0)
 
     def new_battle(self, next_enemy_name: str):
-        if self.game == None:
+        if self.game is None:
             return
 
-        self.current_battle = battle_service.create_battle(self.game, next_enemy_name)
+        self.current_battle = battle_service.create_battle(
+            self.game, next_enemy_name
+        )
         enemy = self.current_battle.enemy
         enemy_ui = Enemy(
             {
@@ -190,7 +180,7 @@ class GameScreen(BaseScreen):
                     "color": (0, 0, 1, 1),
                 },
             },
-            "",
+            next_enemy_name,
         )
         self.enemy_wrapper.enemy_update(enemy_ui)
         self.history_panel.add_history_logs(
@@ -200,7 +190,6 @@ class GameScreen(BaseScreen):
             ]
         )
 
-    ### MODES ###
     def full_auto_mode(self):
         while not self.paused:
             self.one_action_mode()
@@ -230,19 +219,25 @@ class GameScreen(BaseScreen):
             self.half_auto_mode(cast(Actor, self.current_battle.enemy))
 
     def ui_update(self, history, logs, player, battles_count):
-        Clock.schedule_once(lambda _: self.history_panel.add_history_logs(logs))
+        Clock.schedule_once(
+            lambda _: self.history_panel.add_history_logs(logs)
+        )
         Clock.schedule_once(lambda _: self.selected_action_update(history))
         Clock.schedule_once(lambda _: self.icon_bar.disable_all())
 
         sleep(0.5)
         Clock.schedule_once(lambda _: self.update_stats(history))
-        Clock.schedule_once(lambda _: self.enabled_actions_update(history, player))
+        Clock.schedule_once(
+            lambda _: self.enabled_actions_update(history, player)
+        )
 
         if (
-            history.battle_state.winner != None
+            history.battle_state.winner is not None
             and history.battle_state.battle_nr == battles_count
         ):
-            Clock.schedule_once(lambda _: self.game_end(history.battle_state.winner))
+            Clock.schedule_once(
+                lambda _: self.game_end(history.battle_state.winner)
+            )
             self.paused = True
             return
 
@@ -280,9 +275,7 @@ class GameScreen(BaseScreen):
             bool(player.potions > 0),
         )
 
-        self.icon_bar.enabled_icons(
-            [action.id for action in actions]  # pyright: ignore
-        )
+        self.icon_bar.enabled_icons([action.id for action in actions])
 
         if history.battle_state.current_actor == history.battle_state.enemy:
             self.icon_bar.disable_all()

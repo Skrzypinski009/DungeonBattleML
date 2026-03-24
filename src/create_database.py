@@ -16,7 +16,7 @@ def fill_database():
         ActorType.create(name="player", max_health=100, max_energy=8, attack_damage=15)
         ActorType.create(name="rat", max_health=50, max_energy=5, attack_damage=12)
         ActorType.create(name="skeleton", max_health=75, max_energy=6, attack_damage=15)
-        ActorType.create(name="orc", max_health=100, max_energy=7, attack_damage=20)
+        ActorType.create(name="orc", max_health=100, max_energy=7, attack_damage=17)
 
         ActionType.create(name="attack", energy_cost=4)
         ActionType.create(name="heavy attack", energy_cost=6)

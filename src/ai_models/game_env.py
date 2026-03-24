@@ -1,17 +1,14 @@
+import gymnasium as gym
+import numpy as np
+from db.models import BattleState, GameState
+from gymnasium import spaces
 from numpy.random import randint
-from db.models import (
-    GameState,
-    BattleState,
-)
 from services import (
     action_service,
-    game_service,
     battle_service,
     dataset_service,
+    game_service,
 )
-import gymnasium as gym
-from gymnasium import spaces
-import numpy as np
 
 
 class GameEnv(gym.Env):
@@ -29,7 +26,8 @@ class GameEnv(gym.Env):
         self.player_potions = player_potions
 
         low = [1, 1, 100, 8, 15, 0, 0, 10, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0]
-        high = [999, 10, 100, 8, 15, 100, 8, 999, 99, 100, 999, 99, 5, 5, 1, 1, 1, 1]
+        high = [999, 10, 100, 8, 15, 100, 8, 999, 99, 100, 999, 99, 5, 5]
+        high += [1, 1, 1, 1]
 
         self.observation_space = spaces.Box(
             low=np.array(low, np.float32),
@@ -51,13 +49,13 @@ class GameEnv(gym.Env):
     def step(self, action) -> tuple:
 
         self.play_turn(action)
-        (reward, terminated, truncated) = self.turn_learning_data()
+        reward, terminated, truncated, info = self.turn_learning_data()
         self.state = self.get_current_state()
 
         if terminated or truncated:
             self.end()
 
-        return self.state, reward, terminated, truncated, {}
+        return self.state, reward, terminated, truncated, info
 
     def new_battle(self):
         self.current_battle = battle_service.create_battle(
@@ -97,22 +95,25 @@ class GameEnv(gym.Env):
         reward = 0
         terminated = False
         truncated = False
+        info = {}
 
-        player_hp_ratio, enemy_hp_ratio = self.get_hp_ratio()
+        player_hp_ratio, enemy_hp_ratio = self.get_hp_ratio(self.state)
         hp_ratio = player_hp_ratio - enemy_hp_ratio
         reward += hp_ratio * 2
 
         if self.current_battle.winner:
             terminated = True
             if self.current_battle.winner == self.game.player:
-                reward += 10
+                reward += 20
+                info["winner"] = "player"
             else:
-                reward -= 10
+                reward -= 20
+                info["winner"] = "enemy"
 
         if self.current_battle.turn_nr >= 25:
             truncated = True
 
-        return reward, terminated, truncated
+        return reward, terminated, truncated, info
 
     @classmethod
     def get_hp_ratio(cls, state):
