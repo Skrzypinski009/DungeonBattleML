@@ -25,15 +25,6 @@ def get_avaliable(energy: int, have_potions: bool) -> list:
         if not have_potions:
             actions.remove(ActionTypeEnum.REGENERATION)
 
-    # regen_actions: list[ActionType] = [
-    # action for action in actions if action.id == ActionTypeEnum.REGENERATION.id
-    # ]
-    # regen_action = regen_actions[0] if len(regen_actions) > 0 else None
-    #
-    # if have_potions and regen_action != None:
-    # print(regen_action.name)
-    # actions.remove(regen_action)
-
     return actions
 
 
@@ -44,7 +35,7 @@ def get_avaliable_actor(actor: Actor):
 def get_by_name(name: str) -> ActionType:
     action = ActionType.select().where(ActionType.name == name).first()
     if action == None:
-        raise Exception(f"There is no action named '{name}'!")
+        raise Exception(f"Database has no action named '{name}'!")
     return action
 
 
@@ -176,13 +167,13 @@ def action_sequences():
     N = ActionTypeEnum.NONE
 
     return [
-        {"sequence": [A, R, N], "cost": 7},
-        {"sequence": [A, B], "cost": 6},
-        {"sequence": [A, N], "cost": 4},
-        {"sequence": [H, B], "cost": 8},
-        {"sequence": [H, N], "cost": 6},
-        {"sequence": [R, N], "cost": 3},
-        {"sequence": [R, B], "cost": 5},
-        {"sequence": [B], "cost": 2},
-        {"sequence": [N], "cost": 0},
+        {"id": 0, "sequence": [A, R, N], "cost": 7},
+        {"id": 1, "sequence": [A, B], "cost": 6},
+        {"id": 2, "sequence": [A, N], "cost": 4},
+        {"id": 3, "sequence": [H, B], "cost": 8},
+        {"id": 4, "sequence": [H, N], "cost": 6},
+        {"id": 5, "sequence": [R, N], "cost": 3},
+        {"id": 6, "sequence": [R, B], "cost": 5},
+        {"id": 7, "sequence": [B], "cost": 2},
+        {"id": 8, "sequence": [N], "cost": 0},
     ]

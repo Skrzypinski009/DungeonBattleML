@@ -70,7 +70,6 @@ def current_actor_turn(
         current_actor,
         action,
         other_actor,
-        battle,
     )
 
     if other_actor.health == 0:

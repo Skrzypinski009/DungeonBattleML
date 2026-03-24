@@ -1,10 +1,11 @@
 from kivy.uix.label import Label
 
-from ui.assets.loading_circle import LoadingCircle
-from ui.assets.screen_title import ScreenTitle
-from ui.play_screen import PlayScreen
-from ui.models_screen import ModelsScreen
+from .models_screen import ModelsScreen
+from .play_screen import PlayScreen
 from .base_screen import BaseScreen
+
+from .assets.loading_circle import LoadingCircle
+from .assets.screen_title import ScreenTitle
 from .assets.menu import MenuContainer, MenuButton
 
 

@@ -4,7 +4,6 @@ from db.models import Dataset, GameState, BattleState, BattleHistory
 from db.models.action_type import ActionType
 from db.models.actor import Actor
 from db.models.actor_type import ActorType
-from db.queries import unpacked_battle_history_df
 from services import action_service, battle_history_service, battle_service
 
 from typing import Iterable
@@ -279,7 +278,6 @@ def get_avaliable_sequences(state):
     can_regen = d["regeneration_avaliable"] == 1
     R = action_service.ActionTypeEnum.REGENERATION
 
-    avaliable_actions = action_service.get_avaliable(player_energy, can_regen)
     sequences = action_service.action_sequences()
     avaliable_sequences = []
 
@@ -292,10 +290,5 @@ def get_avaliable_sequences(state):
 
 
 def get_avaliable_sequences_ids(state):
-    avaliable_actions = []
-    sequences = action_service.action_sequences()
     avaliable_sequences = get_avaliable_sequences(state)
-    for i, seq in enumerate(sequences):
-        if seq in avaliable_sequences:
-            avaliable_actions.append(i)
-    return avaliable_actions
+    return [seq["id"] for seq in avaliable_sequences]

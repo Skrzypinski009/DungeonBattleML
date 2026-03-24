@@ -83,7 +83,7 @@ class ModelsScreen(BaseScreen):
         self.load_models()
 
     def load_models(self):
-        self.models = ai_model_service.get_all_ai_models()
+        self.models = ai_model_service.get_ai_models()
         self.refresh()
 
     def refresh(self):
@@ -96,8 +96,8 @@ class ModelsScreen(BaseScreen):
                 spacing=10,
             )
 
-            model_name = model["name"]
-            model_type = model["type"]
+            model_name = model.name
+            model_type = model.type
 
             row.add_widget(
                 Label(
@@ -111,7 +111,7 @@ class ModelsScreen(BaseScreen):
                     text="Usuń",
                     size_hint=(None, None),
                     size=(80, 30),
-                    on_press=lambda x: self.remove(model["id"]),  # pyright: ignore
+                    on_press=lambda x: self.remove(model.id),  # pyright: ignore
                 )
             )
             self.list_layout.add_widget(row)

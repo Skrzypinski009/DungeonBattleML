@@ -1,9 +1,12 @@
 numpy
-peewee
 pandas
-pytest
+matplotlib
+seaborn
+
+peewee
 kivy
+kivy_garden.matplotlib
+
 scikit-learn
 stable_baselines3
 gymnasium 
-

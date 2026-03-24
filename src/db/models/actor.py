@@ -6,7 +6,7 @@ from .actor_type import ActorType
 
 class Actor(BaseModel):
     type = ForeignKeyField(ActorType)
-    health = IntegerField(null=False)
-    energy = IntegerField(null=False)
-    potions = IntegerField(null=False)
+    health = IntegerField()
+    energy = IntegerField()
+    potions = IntegerField()
     last_action = ForeignKeyField(ActionType, null=True)

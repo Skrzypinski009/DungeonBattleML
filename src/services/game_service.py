@@ -1,6 +1,5 @@
 from typing import Callable, cast
 from peewee import fn
-from db import queries
 from db.models import GameState, Actor, BattleState, BattleHistory
 from db.models.action_type import ActionType
 from services import actor_service, battle_service, battle_history_service
@@ -53,7 +52,7 @@ def game_turn_data(
         action,
     )
     logs = battle_history_service.history_log(
-        history, cast(BattleState, current_battle)
+        cast(BattleState, current_battle),
     )
     player = history.battle_state.game.player
     battles_count = battle_service.get_battles_count(game)
