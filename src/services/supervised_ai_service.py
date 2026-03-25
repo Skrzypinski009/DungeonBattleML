@@ -1,87 +1,168 @@
 import pandas as pd
 from db.models.action_type import ActionType
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.compose import make_column_transformer
+from services import dataset_service
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import cross_validate
+from dataclasses import dataclass
+import pandas as pd
 
 
-def supervised_learning(df: pd.DataFrame, model, model_type: str) -> dict:
-    df.fillna(0, inplace=True)
-    target = df["action_type"]
-    df = df.drop(columns=["dataset_nr", "id", "action_type"])
-    X_train, X_test, y_train, y_test = train_test_split(df, target)
+@dataclass
+class SupervisedOptions:
+    cross_validation: int = 0
+    grid_search_parameters: list[str] = []
+    fixed_parameters: dict[str, list] = {}
 
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
-    score = model.score(X_test, y_test)
 
-    target_names = ["attack", "heavy_attack", "block", "regeneration", "none"]
+def get_parameters_grid(params) -> dict[str, list]:
+    param_grid = {
+        "max_depth": [5, 10, 15, 20],
+        "min_samples_split": [2, 5, 10],
+        "min_samples_leaf": [1, 2, 4],
+        "n_estimators": [20, 50, 100, 200, 300],
+        "hidden_layer_sizes": [(64, 32), (32, 16, 8), (32, 32)],
+        "alpha": [0.0001, 0.001, 0.01],
+        "max_iter": [200, 500],
+    }
+    return {k: param_grid[k] for k in params if k in param_grid}
 
-    # TODO: delete this
-    report = classification_report(
-        y_test, y_pred, target_names=target_names, output_dict=True
+
+def gridsearch(model, X, y, supervised_options: SupervisedOptions) -> None:
+    param_grid = get_parameters_grid(
+        supervised_options.grid_search_paramseters,
     )
 
-    rows = [report[label_name] for label_name in target_names]
-    print(rows)
+    if isinstance(model, Pipeline):
+        name = model.steps[-1][0]
+        param_grid = {
+            name + "__" + k: param_grid[k] for k in param_grid.keys()
+        }
 
-    df_report = pd.DataFrame(rows)
+    search = GridSearchCV(
+        model,
+        cv=5,
+        param_grid=param_grid,
+        scoring="accuracy",
+        return_train_score=True,
+        refit=False,
+    )
+    search.fit(X, y)
 
-    return {
-        "type": model_type,
-        "model": model,
-        "score": score,
-        "report": df_report,
-    }
+    model.set_params(**search.best_parameters_)
 
 
-def train_model(type: str, dataset_df: pd.DataFrame) -> dict:
-    match (type):
+def cross_validation(model, X, y, cv: int) -> None:
+    cv_results = cross_validate(
+        model,
+        X,
+        y,
+        cv=cv,
+        scoring="accuracy",
+        return_train_score=True,
+    )
+
+    resutls = pd.DataFrame(cv_results)[["test_score", "train_score"]].mean()
+    return resutls
+
+
+def supervised_learning(
+    df: pd.DataFrame,
+    model,
+    model_type: str,
+    supervised_options=SupervisedOptions(),
+) -> dict:
+
+    results = {}
+    df.fillna(0, inplace=True)
+    y = df["action_type"]
+    X = df.drop(columns=["action_type"])
+
+    model.set_params(**supervised_options.fixed_parameters)
+
+    if len(supervised_options.grid_search_parameters.keys()) > 0:
+        gridsearch(model, X, y, supervised_options)
+
+    if supervised_options.cross_validation:
+        cv_results = cross_validate(
+            model, X, y, supervised_options.cross_validation
+        )
+        results["cv_mean_test_score"] = cv_results["test_score"]
+        results["cv_mean_train_score"] = cv_results["train_score"]
+
+    model.fit(X, y)
+    results["all_data_score"] = model.score(X, y)
+    results["model"] = model
+    results["model_type"] = model_type
+
+    return results
+
+
+def train_model(
+    model_type: str,
+    dataset_df: pd.DataFrame,
+    supervised_options=SupervisedOptions(),
+) -> dict:
+    dataset_df = dataset_df.drop(columns=["dataset_nr", "id"])
+
+    match (model_type):
         case "decision_tree":
-            return train_decision_tree(dataset_df)
+            model = get_decision_tree()
         case "random_forest":
-            return train_random_forest(dataset_df)
+            model = get_random_forest()
         case "mlp":
-            return train_mlp(dataset_df)
-    return {}
+            model = get_mlp()
+
+    supervised_learning(dataset_df, model, model_type, supervised_options)
 
 
-def train_random_forest(df: pd.DataFrame) -> dict:
-    model = RandomForestClassifier(
+def get_random_forest() -> dict:
+    return RandomForestClassifier(
         n_estimators=100,
         max_depth=10,
         max_features="sqrt",
     )
-    return supervised_learning(df, model, "random_forest")
 
 
-def train_decision_tree(df: pd.DataFrame) -> dict:
-    model = DecisionTreeClassifier(max_depth=6)
-    return supervised_learning(df, model, "decision_tree")
+def get_decision_tree() -> dict:
+    return DecisionTreeClassifier(max_depth=6)
 
 
-def train_mlp(df: pd.DataFrame) -> dict:
-    model = Pipeline(
+def pipeline_with_scaler(model_name, model_object) -> Pipeline:
+    numerical_columns = dataset_service.get_numerical_columns()
+    preprocessor = make_column_transformer(
+        (StandardScaler(), numerical_columns),
+        remainder="passthrough",
+    )
+    return Pipeline(
         [
-            ("scaler", StandardScaler()),
+            ("preprocessor", preprocessor),
             (
-                "mlp",
-                MLPClassifier(
-                    hidden_layer_sizes=(64, 32),
-                    activation="relu",
-                    solver="adam",
-                    max_iter=500,
-                    early_stopping=True,
-                    random_state=42,
-                ),
+                model_name,
+                model_object,
             ),
         ]
     )
-    return supervised_learning(df, model, "mlp")
+
+
+def get_mlp() -> dict:
+    return pipeline_with_scaler(
+        "mlp",
+        MLPClassifier(
+            hidden_layer_sizes=(64, 32),
+            activation="relu",
+            solver="adam",
+            max_iter=500,
+            early_stopping=True,
+            random_state=42,
+        ),
+    )
 
 
 def predict_supervised(model, state) -> ActionType:

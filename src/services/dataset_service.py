@@ -9,6 +9,34 @@ from peewee import Case, ModelSelect, fn
 from services import action_service, battle_service
 
 
+def get_categorical_columns():
+    return [
+        "action_type",
+        "last_action_type",
+        "attack_avaliable",
+        "heavy_attack_avaliable",
+        "block_avaliable",
+        "regeneration_avaliable",
+    ]
+
+
+def get_numerical_columns():
+    return [
+        "turn_nr",
+        "action_nr",
+        "player_max_health",
+        "player_max_energy",
+        "player_attack_damage",
+        "player_health",
+        "player_energy",
+        "enemy_max_health",
+        "enemy_max_energy",
+        "enemy_attack_damage",
+        "enemy_health",
+        "enemy_energy",
+    ]
+
+
 def dataset_query(battle: BattleState):
     # aliasy dla ActorType
     EnemyType = ActorType.alias()
@@ -54,7 +82,7 @@ def dataset_query(battle: BattleState):
             BattleHistory.enemy_energy,
             # action type
             ActionType.id.alias("action_type"),
-            # last action
+            # actions
             fn.LAG(ActionType.id)
             .over(order_by=[BattleHistory.id])
             .alias("last_action_type"),
@@ -232,6 +260,12 @@ def get_dataset_ids() -> tuple[int]:
 
 def get_dataset_by_id(id: int) -> ModelSelect:
     return Dataset.select().where(Dataset.dataset_nr == id)
+
+
+def get_dataset_df(id: int) -> DataFrame:
+    return DataFrame(
+        get_dataset_by_id(id).dicts(),
+    )
 
 
 def get_datasets() -> list[tuple[Dataset]]:
