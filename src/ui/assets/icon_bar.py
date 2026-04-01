@@ -22,7 +22,7 @@ class IconBar(RelativeLayout):
         self.height = self.icon_size
 
         self.icon_selection = Image(
-            source="img/skill_icon_select.png",
+            source="data/img/skill_icon_select.png",
             size_hint_x=None,
             size_hint_y=None,
             width=self.icon_size,

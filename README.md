@@ -1,6 +1,8 @@
 # DungeonBattleML
 A program for testing AI algorithms in a turn-based battle game.
 
+![Battle UI](./photos/agent_game.png)
+
 ## Technologies Used
 - **Python 3.13**
 - **Main libraries:**

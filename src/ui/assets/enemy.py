@@ -22,7 +22,7 @@ class Enemy(BoxLayout):
         self.stat_bars.set(stats)
         print(enemy_name)
         self.image = Image(
-            source=f"img/{enemy_name}.png",
+            source=f"data/img/{enemy_name}.png",
             size_hint_x=None,
             size_hint_y=None,
             height=500,

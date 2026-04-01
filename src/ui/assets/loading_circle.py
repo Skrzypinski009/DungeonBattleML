@@ -5,7 +5,7 @@ from kivy.uix.image import Image
 
 class LoadingCircle(Image):
     def __init__(self, **kwargs):
-        super().__init__(source="img/loading_circle.png", **kwargs)
+        super().__init__(source="data/img/loading_circle.png", **kwargs)
         self.angle = 0
 
         with self.canvas.before:
