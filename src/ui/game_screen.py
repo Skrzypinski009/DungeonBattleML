@@ -45,7 +45,7 @@ class GameScreen(BaseScreen):
         self.history_panel = self.right_panel.history_panel
 
         background = Image(
-            source="img/background.png",
+            source="data/img/background.png",
             size_hint=(None, None),
             width=1920,
             height=1080,

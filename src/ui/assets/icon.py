@@ -28,4 +28,4 @@ class Icon(Image):
             ActionTypeEnum.BLOCK.id: 3,
             ActionTypeEnum.REGENERATION.id: 4,
         }[action_type_id]
-        return f"img/skill_icon{nr}.png"
+        return f"data/img/skill_icon{nr}.png"
